@@ -10,7 +10,7 @@
         <div class="swiper-area">
             <van-swipe :autoplay="1000" >
                 <van-swipe-item v-for="(banner,index) in bannerPicArray" :key="index">
-                    <img :src="banner.imageUrl" class="swiperImg" >
+                    <img :src="banner.image" class="swiperImg" >
                 </van-swipe-item>
             
             </van-swipe>
@@ -24,35 +24,69 @@
         <div class="ad-bar">
             <img :src="adBanner.PICTURE_ADDRESS" width="100%" >
         </div>
+        <div class="recommend-area">
+            <div class="recommend-title">
+                商品推荐
+            </div>
+            <div class="recommend-body">
+                <swiper :options="swiperOption">
+                   <swiper-slide v-for="(item,index) in recommendGoods " :key="index" class="slideGo">
+                       <div class="recommend-item">
+                           <img :src="item.image" width="80%">
+                           <div>{{item.goodsName}}</div>
+                           <div>￥{{item.price | moneyFilter}}(￥{{item.mallPrice  | moneyFilter}})</div>
+                       </div>
+                   </swiper-slide> 
+                </swiper>
+            </div>
+        </div>
+
     </div>
    
 </template>
 
 <script>
+    import 'swiper/dist/css/swiper.css'
+    import { toMoney } from '@/fillter/moneyFilter.js'
+    import { swiper, swiperSlide } from 'vue-awesome-swiper'
 
     export default {
+        components: {
+                        swiper,
+                        swiperSlide
+                },
         data() {
             return {
+                    
+                    swiperOption:{
+                        slidesPerView :3
+                    },
                     locationIcon:require('../../assets/images/location.png'),
-                    bannerPicArray:[
-                        {imageUrl:require('../../assets/images/timg1.jpg')},
-                        {imageUrl:require('../../assets/images/timg2.jpg')},
-                        {imageUrl:require('../../assets/images/timg3.jpg')},
-                    ],
                     category:[],
-                    adBanner:[]
+                    adBanner:[],
+                    bannerPicArray:[],
+                    recommendGoods:[],
+     
+            }
+        },
+        filters:{
+            moneyFilter(money){
+                return toMoney(money)
             }
         },
         created(){
             this.$axios({
-                url: 'https://www.easy-mock.com/mock/5c822923e2062b28ed86bdb5/shoppingMall/getInfo',
+                url: 'http://localhost:8080/static/shopJson.json',
                 method:'get',
             })
-            .then(repsonse =>{
-                console.log(repsonse);
-                if(repsonse.status == '200'){
-                    this.category = repsonse.data.data.category;
-                    this.adBanner = repsonse.data.data.advertesPicture
+            .then(response =>{
+                console.log(response);
+                if(response.status == '200'){
+                    this.category = response.data.data.category;
+                    this.adBanner = response.data.data.advertesPicture;
+                    this.bannerPicArray = response.data.data.slides;
+                    this.recommendGoods = response.data.data.recommend;  //推荐商品
+                    console.log(this.bannerPicArray)
                 }
             })
             .catch((error)=>{
@@ -93,7 +127,7 @@
     margin-top: .5rem;
 }
 .type-bar{
-    height: 6rem;
+    height: 6rem; 
     background-color: #fff;
     margin:0 .3rem .3rem .3rem;
     border-radius: 0.3rem;
@@ -115,6 +149,25 @@
 .ad-bar{
     height: 2rem;
     
+}
+.recommend-area{
+    background-color: #fff;
+    margin-top: .3rem;
+}
+.recommend-title{
+    border-bottom:1px solid #eee;
+    font-size:14px;
+    padding:.2rem;
+    color:#e5017d;
+}
+.recommend-body{
+       border-bottom: 1px solid #eee;
+}
+.recommend-item{
+    width:99%;
+    border-right: 1px solid #eee;
+    font-size: 12px;
+    text-align: center;
 }
 </style>
 
